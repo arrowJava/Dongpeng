@@ -30,6 +30,8 @@ public class BoxCodeShardingStrategy implements ShardingStrategy{
 		return shardingColumns;
 	}
 
+	//note:
+	
 	@Override
 	@SuppressWarnings("rawtypes")
 	public Collection<String> doSharding(Collection<String> availableTargetNames,
