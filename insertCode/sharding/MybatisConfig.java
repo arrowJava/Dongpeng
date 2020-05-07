@@ -82,60 +82,11 @@ public class MybatisConfig {
 		master.setMinIdle(16);
 		master.setMaxWait(60000);
 		
-		DataSource sourceCodeDataSource =  createDataSource(sourceCodeJdbcConfig, SourceCodeJdbcConfig.NAME);
-
-		//新基础数据库（产品 产品类型 行政区域）
-		DruidDataSource base = new DruidDataSource();
-		base.setDriverClassName(baseJdbcConfig.getDriverClassName());
-		base.setUrl(baseJdbcConfig.getUrl());
-		base.setUsername(baseJdbcConfig.getUsername());
-		base.setPassword(baseJdbcConfig.getPassword());
-		base.setMaxActive(64);
-		base.setMinIdle(16);
-		base.setMaxWait(60000);
-
-		//商户业务库
-		DataSource storeSource = createDataSource(storeJdbcConfig, StoreJdbcConfig.NAME);
-		Map <String, DataSource> storeDataSourceMap = new HashMap <String, DataSource>();
-		storeDataSourceMap.put("store", storeSource);
-
-		TableRuleConfiguration boxInCodeTableRuleConfig = new TableRuleConfiguration();
-		boxInCodeTableRuleConfig.setLogicTable("t_box_in_check_code");
-		boxInCodeTableRuleConfig.setTableShardingStrategyConfig(new BoxInCheckCodeShardingStrategyConfiguration("box_in_code"));
-
-		TableRuleConfiguration bottleInCodeTableRuleConfig = new TableRuleConfiguration();
-		bottleInCodeTableRuleConfig.setLogicTable("t_bottle_in_check_code");
-		bottleInCodeTableRuleConfig.setTableShardingStrategyConfig(new CodeInCheckShardingStrategyConfiguration("bottle_in_code"));
-
-		ShardingRuleConfiguration storeShardingRuleConfig = new ShardingRuleConfiguration();
-		storeShardingRuleConfig.getTableRuleConfigs().add(boxInCodeTableRuleConfig);
-		storeShardingRuleConfig.getTableRuleConfigs().add(bottleInCodeTableRuleConfig);
-
-
-		//瓶内码库
-		DataSource codeDataSource = createDataSource(capCodeJdbcConfig,CapCodeJdbcConfig.NAME);
-		Map <String, DataSource> codeDataSourceMap = new HashMap <String, DataSource>();
-		codeDataSourceMap.put("code", codeDataSource);
-
-		TableRuleConfiguration codeTableRuleConfig = new TableRuleConfiguration();
-		codeTableRuleConfig.setLogicTable("t_cap_code");
-		codeTableRuleConfig.setTableShardingStrategyConfig(new CodeShardingStrategyConfiguration("code"));
-
-		ShardingRuleConfiguration codeShardingRuleConfig = new ShardingRuleConfiguration();
-		codeShardingRuleConfig.getTableRuleConfigs().add(codeTableRuleConfig);
-
-		//瓶外码库
-		DataSource outCodeDataSource = createDataSource(capOutCodeJdbcConfig,CapOutCodeJdbcConfig.NAME);
-		Map <String, DataSource> outCodeDataSourceMap = new HashMap <String, DataSource>();
-		outCodeDataSourceMap.put("outCode", outCodeDataSource);
-
-		TableRuleConfiguration outCodeTableRuleConfig = new TableRuleConfiguration();
-		outCodeTableRuleConfig.setLogicTable("t_cap_out_code");
-		outCodeTableRuleConfig.setTableShardingStrategyConfig(new OutCodeShardingStrategyConfiguration("out_code"));
-
-		ShardingRuleConfiguration outCodeShardingRuleConfig = new ShardingRuleConfiguration();
-		outCodeShardingRuleConfig.getTableRuleConfigs().add(outCodeTableRuleConfig);
-
+		//note：
+		// 1.获取数据源。这一步就是说通过配置文件的配置拿到这个数据源（boxcodeJdbcConfig:实际上是继承了JdbcConfig的。）
+		// 2.获取表的分片策略。要制定表明（logicTable），再指定分片的规则。（这个规则是一个配置对象，这个对象里面是决定是根据
+		// 哪个字段进行分片，以及通过什么规则去匹配到具体的表）
+		
 		//箱内码库(源码)
 		DataSource boxCodeDataSource = createDataSource(boxCodeJdbcConfig,BoxCodeJdbcConfig.NAME);
 		Map <String, DataSource> boxCodeDataSourceMap = new HashMap <String, DataSource>();
@@ -148,34 +99,7 @@ public class MybatisConfig {
 		ShardingRuleConfiguration boxCodeShardingRuleConfig = new ShardingRuleConfiguration();
 		boxCodeShardingRuleConfig.getTableRuleConfigs().add(boxCodeTableRuleConfig);
 
-		//箱外码库
-		DataSource boxOutCodeDataSource = createDataSource(boxOutCodeJdbcConfig,BoxOutCodeJdbcConfig.NAME);
-		Map <String, DataSource> boxOutCodeDataSourceMap = new HashMap <String, DataSource>();
-		boxOutCodeDataSourceMap.put("boxOutCode", boxOutCodeDataSource);
-
-		TableRuleConfiguration boxOutCodeTableRuleConfig = new TableRuleConfiguration();
-		boxOutCodeTableRuleConfig.setLogicTable("t_box_out_code");
-		boxOutCodeTableRuleConfig.setTableShardingStrategyConfig(new BoxOutCodeShardingStrategyConfiguration("out_code"));
-
-		ShardingRuleConfiguration boxOutCodeShardingRuleConfig = new ShardingRuleConfiguration();
-		boxOutCodeShardingRuleConfig.getTableRuleConfigs().add(boxOutCodeTableRuleConfig);
-
-		//生成码库
-		DataSource codeGenerateDataSource = createDataSource(codeGenerateJdbcConfig,CodeGenerateJdbcConfig.NAME);
-		Map <String, DataSource> codeGenerateDataSourceMap = new HashMap <String, DataSource>();
-		codeGenerateDataSourceMap.put("codeGenerate", codeGenerateDataSource);
-
-		TableRuleConfiguration codeGenerateTableRuleConfig = new TableRuleConfiguration();
-		codeGenerateTableRuleConfig.setLogicTable("t_generate_code");
-		codeGenerateTableRuleConfig.setTableShardingStrategyConfig(new CodeGenerateShardingStrategyConfiguration("code"));
-
-		TableRuleConfiguration wxCodeTableRuleConfig = new TableRuleConfiguration();
-		wxCodeTableRuleConfig.setLogicTable("t_wxcode_apply_code");
-		wxCodeTableRuleConfig.setTableShardingStrategyConfig(new WxCodeShardingStrategyConfiguration("qr_code"));
-
-		ShardingRuleConfiguration codeGenerateShardingRuleConfig = new ShardingRuleConfiguration();
-		codeGenerateShardingRuleConfig.getTableRuleConfigs().add(codeGenerateTableRuleConfig);
-		codeGenerateShardingRuleConfig.getTableRuleConfigs().add(wxCodeTableRuleConfig);
+		
 
 		//noSharding 生成码库
 		DataSource noShardingCodeGenerateDataSource = createDataSource(codeGenerateJdbcConfig,CodeGenerateJdbcConfig.NO_SHARDING_NAME);
@@ -187,7 +111,10 @@ public class MybatisConfig {
 		DataSource noShardingBoxCodeDataSource = createDataSource(boxCodeJdbcConfig,BoxCodeJdbcConfig.NO_SHARDING_NAME);
 		//noSharding 箱外码库
 		DataSource noShardingBoxOutCodeDataSource = createDataSource(boxOutCodeJdbcConfig,BoxOutCodeJdbcConfig.NO_SHARDING_NAME);
-		// 动态源
+		
+		
+		//note：
+		// 动态数据源配置是一个主数据源，以及多个其他数据源。
 		DynamicDataSource dynamicDataSource = new DynamicDataSource();
 		dynamicDataSource.setDefaultTargetDataSource(master);
 		Map<Object, Object> targetDataSources = new HashMap<Object, Object>();
